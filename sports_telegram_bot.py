@@ -17,11 +17,12 @@ def get_nba_player_team(player_name):  # # gets a player's name, and return his 
     params = {"page": 0, "per_page": 1, "search": player_name}
     response = requests.get(basketball_url, params)
     player_data = response.json()
-    print(player_data)
 
     if player_data and player_data["data"]:
         player_team = player_data["data"][0]["team"]["full_name"]
         return player_team
+
+    return "could not find the player"
 
 # football functions:
 def get_footballer_team(player_name):  # gets a player's name, and return his team
@@ -32,7 +33,7 @@ def get_footballer_team(player_name):  # gets a player's name, and return his te
     player_data = response.json()  
     
     # Check if the player exists
-    if player_data and player_data["player"]:
+    if player_data and player_data["player"] and player_data["player"][0]["strSport"] == "Soccer":
         player_id = player_data["player"][0]["idPlayer"]
 
     else: 
