@@ -46,39 +46,38 @@ def get_footballer_team(player_name):  # gets a player's name, and return his te
     team_name = player_team_data["players"][0].get("strTeam")
     return team_name
 
-# answer boolean variables
-is_sent_welcome = False
-is_chosen_football = False
-is_chosen_basketball = False
+# dict to map user_id to his current state
+user_to_state = {}
 
 # handle a massage to the telegram bot:
 @bot.message_handler(func=lambda message: True) 
 def handle_message(message):
-    global is_sent_welcome
-    global is_chosen_football
-    global is_chosen_basketball
-
+   
+    user_id = message.from_user.id
+    if user_id not in user_to_state:
+        user_to_state[user_id] = {"is_sent_welcome": False, "is_chosen_football": False, "is_chosen_basketball": False}
+    
     answer = message.text
 
-    if not is_sent_welcome:  # need to send a weolcome message
+    if not user_to_state[user_id]["is_sent_welcome"]:  # need to send a weolcome message
         bot.reply_to(message, "hello! please choose the sport you're intrested in: football or basketball")
-        is_sent_welcome = True
+        user_to_state[user_id]["is_sent_welcome"] = True
 
     elif answer == "football":  # the user chose football
         bot.reply_to(message, "please provide a footballer's name, and i will provide his team")
-        is_chosen_football = True
-        is_chosen_basketball = False
+        user_to_state[user_id]["is_chosen_football"] = True
+        user_to_state[user_id]["is_chosen_basketball"] = False
     
     elif answer == "basketball":  # the user chose basketball
         bot.reply_to(message, "please provide a nba player's name, and i will provide his team")
-        is_chosen_basketball = True
-        is_chosen_football = False
+        user_to_state[user_id]["is_chosen_basketball"] = True
+        user_to_state[user_id]["is_chosen_football"] = False
         
-    elif is_chosen_football:   # the user is sending a footballer's name 
+    elif user_to_state[user_id]["is_chosen_football"]:   # the user is sending a footballer's name 
         reply = get_footballer_team(answer)
         bot.reply_to(message, reply)
     
-    elif is_chosen_basketball:   # the user is sending a nba player's name 
+    elif user_to_state[user_id]["is_chosen_basketball"]:   # the user is sending a nba player's name 
         reply = get_nba_player_team(answer)
         bot.reply_to(message, reply)
 
